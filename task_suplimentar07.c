@@ -10,10 +10,6 @@ typedef struct Cladire {
 	int nrEtaje;
 };
 
-typedef struct Restaurant {
-	char* nume;
-	int capacitate;
-};
 
 typedef struct Nod {
 	Cladire info;
@@ -68,13 +64,14 @@ void inserareLaFinalLista(Nod** lista, Cladire c) {
 
 void inserareCladireInTabel(HashTable hashTable, Cladire c) {
 	int hashCode = hash(c.anConstructie, hashTable.dimensiune);
-	if (hashTable.lista[hashCode] == NULL) {
-		inserareLaFinalLista(&hashTable.lista[hashCode], c);
-	}
-	else {
-		//avem coliziune
-		inserareLaFinalLista(&hashTable.lista[hashCode], c);
-	}
+	inserareLaFinalLista(&hashTable.lista[hashCode], c);
+
+	//if (hashTable.lista[hashCode] == NULL) {
+	//}
+	//else {
+	//	//avem coliziune
+	//	inserareLaFinalLista(&hashTable.lista[hashCode], c);
+	//}
 }
 
 void afisareCladire(Cladire c) {
@@ -105,6 +102,65 @@ void afisareHashTableDupaAn(HashTable ht, int anCautat) {
 	}
 }
 
+//3. Implementati o functie care sterge o cladire pentru care se primeste id - ul si anul construirii.
+
+
+void stergeCladireDupaIdSiAn(HashTable* ht, int id, int anC) {
+	int hashCode = hash(anC, (*ht).dimensiune);
+	Nod* aux = (*ht).lista[hashCode];
+	while (aux) {
+		if (aux->info.id == id) {
+			(*ht).lista[hashCode] = aux->next;
+			free(aux);
+			printf("\nA fost stearsa o cladire\n");
+			break;
+		}
+		Nod* temp = aux->next;
+
+		if (temp->info.id == id) {
+			aux->next = temp->next;
+			free(temp);
+			printf("\nA fost stearsa o cladire\n");
+			break;
+		}
+		aux = aux->next;
+	}
+}
+
+//4. Implementati o functie care sterge o cladire pentru care se primeste doar id - ul cladirii.
+void stergeCladireDupaId(HashTable* ht, int id) {
+	Nod* aux = NULL;
+	for (int i = 0; i < ht->dimensiune; i++) {
+		aux = (*ht).lista[i];
+		while (aux) {
+			if (aux->info.id == id) {
+				(*ht).lista[i] = aux->next;
+				free(aux);
+				printf("\nA fost stearsa o cladire\n");
+				break;
+			}
+
+			Nod* temp = aux->next;
+			if (temp == NULL) {
+				break;
+			}
+
+			if (temp->info.id == id) {
+				aux->next = temp->next;
+				free(temp);
+				printf("\nA fost stearsa o cladire\n");
+				break;
+			}
+			aux = aux->next;
+		}
+	}
+}
+
+//5. Observatii diferenta dintre functia implementata la 4 si functia de la 5.
+// stergerea dupa id si an, poti accesa direct clusterul dupa an (obtii hash din an), 
+//insa la stergerea dupa id, trebuie sa parcurgi tot tabelul.
+
+
 void stergeLista(Nod** n) {
 	Nod* aux = *n;
 	while (aux) {
@@ -125,6 +181,9 @@ void stergeHashTable(HashTable* ht) {
 }
 
 
+
+
+
 void main() {
 	HashTable hashTable = initializareHashTable(10);
 
@@ -138,7 +197,16 @@ void main() {
 	afisareHashTable(hashTable);
 
 	printf("\n\nAfisare cladiri din acelasi cluster:\n");
-	afisareHashTableDupaAn(hashTable, 1984);
+	afisareHashTableDupaAn(hashTable, 1975);
+
+	printf("\n\n------ Stergere cladire dupa id si an: ---------\n");
+	stergeCladireDupaIdSiAn(&hashTable, 3, 2015);
+	afisareHashTable(hashTable);
+
+	printf("\n\n------ Stergere cladire dupa id: ---------\n");
+	stergeCladireDupaId(&hashTable, 4);
+	afisareHashTable(hashTable);
+
 
 	stergeHashTable(&hashTable);
 	printf("\n\t\t%d", hashTable.dimensiune);
